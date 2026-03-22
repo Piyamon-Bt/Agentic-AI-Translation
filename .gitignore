@@ -1,0 +1,111 @@
+# -------------------------
+# Python bytecode / cache
+# -------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# -------------------------
+# Virtual environments
+# -------------------------
+.venv/
+venv/
+ENV/
+env/
+.conda/
+.python-version  # ถ้าใช้ pyenv ให้พิจารณา commit ได้ตามทีม
+
+# -------------------------
+# Secrets / Environment
+# -------------------------
+.env
+.env.*
+*.env
+# ระวังอย่าลงรหัสลับในไฟล์ที่ commit
+
+# -------------------------
+# Packaging / Build
+# -------------------------
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+*.egg
+pip-wheel-metadata/
+pip-log.txt
+
+# -------------------------
+# Project tools
+# -------------------------
+# Poetry / PDM
+poetry.lock
+pdm.lock
+__pypackages__/
+
+# Tox
+.tox/
+.nox/
+
+# Coverage / Test
+.coverage
+.coverage.*
+.cache/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+htmlcov/
+
+# Type checking / Linters
+.mypy_cache/
+.dmypy.json
+.dmypy/
+.pytype/
+.pyre/
+ruff_cache/
+.pyright/
+
+# Jupyter / Data science
+.ipynb_checkpoints/
+.spyderproject
+.spyproject
+.jupyter/
+# รูป/ข้อมูลชั่วคราว
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
+*.sqlite3
+
+# Framework-specific (เปิดใช้ตามจริง)
+# Django: (มัก "ไม่" ควร ignore migrations — ปล่อยคอมมิตได้)
+# */migrations/__pycache__/
+# *-checkpoint.ipynb
+
+# Flask/FastAPI: ไฟล์ instance/local
+instance/
+*.db
+
+# Celery / Scheduler
+celerybeat-schedule
+celerybeat.pid
+
+# -------------------------
+# IDE / Editor
+# -------------------------
+.vscode/
+.idea/
+*.iml
+
+# -------------------------
+# OS files
+# -------------------------
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Icon?
+._*

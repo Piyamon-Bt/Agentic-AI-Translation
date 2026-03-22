@@ -1,0 +1,16 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.12
+langchain==0.3.7
+langchain-google-genai==2.0.4
+langchain-community==0.3.7
+langgraph==0.2.45
+chromadb==0.5.18
+pymupdf==1.24.11
+pypdf2==3.0.1
+pillow==11.0.0
+pytesseract==0.3.13
+python-dotenv==1.0.1
+pydantic==2.9.2
+pydantic-settings==2.6.1
+python-magic==0.4.27

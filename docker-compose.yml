@@ -1,0 +1,19 @@
+# docker-compose.yml
+services:
+  backend:
+    build:
+      context: .  # ตรวจสอบว่ารันคำสั่งในโฟลเดอร์ที่มี Dockerfile
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env      # ใช้ env_file จะสะดวกกว่าการ map ทีละตัวครับ
+    volumes:
+      - .:/app    # Mount code เข้าไปเพื่อให้แก้โค้ดแล้ว auto-reload ได้
+      - chroma_data:/app/chroma_db
+      - upload_temp:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  chroma_data:
+  upload_temp:
