@@ -3,8 +3,27 @@ from pathlib import Path
 from models.schemas import AgentResult, AgentStatus
 
 
-ALLOWED_MIME_TYPES = {"application/pdf"}
+# Supported MIME types grouped by category
+PDF_MIME_TYPES = {"application/pdf"}
+IMAGE_MIME_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/tiff",
+    "image/bmp",
+    "image/webp",
+}
+ALLOWED_MIME_TYPES = PDF_MIME_TYPES | IMAGE_MIME_TYPES
+
 MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
+
+
+def _resolve_file_category(mime_type: str) -> str:
+    """Return 'pdf' or 'image' based on MIME type."""
+    if mime_type in PDF_MIME_TYPES:
+        return "pdf"
+    if mime_type in IMAGE_MIME_TYPES:
+        return "image"
+    return "unknown"
 
 
 def run_file_type_agent(file_path: str, file_name: str) -> AgentResult:
@@ -12,6 +31,7 @@ def run_file_type_agent(file_path: str, file_name: str) -> AgentResult:
     Validates the uploaded file:
     - Checks MIME type using libmagic (not just extension)
     - Checks file size limit
+    - Supports PDF and common image formats (JPEG, PNG, TIFF, BMP, WebP)
     """
     path = Path(file_path)
 
@@ -35,7 +55,12 @@ def run_file_type_agent(file_path: str, file_name: str) -> AgentResult:
         return AgentResult(
             agent_name="file_type_agent",
             status=AgentStatus.ERROR,
-            output={"error": f"Unsupported file type: {mime_type}. Only PDF is allowed."},
+            output={
+                "error": (
+                    f"Unsupported file type: {mime_type}. "
+                    "Supported formats: PDF, JPEG, PNG, TIFF, BMP, WebP."
+                )
+            },
         )
 
     return AgentResult(
@@ -44,6 +69,7 @@ def run_file_type_agent(file_path: str, file_name: str) -> AgentResult:
         output={
             "file_name": file_name,
             "mime_type": mime_type,
+            "file_category": _resolve_file_category(mime_type),
             "file_size_bytes": file_size,
         },
     )
