@@ -7,9 +7,13 @@ from core.config import settings
 logger = logging.getLogger(__name__)
 
 # Free tier allows 5 RPM, so we wait at least 12s between calls to stay safe
-MIN_SECONDS_BETWEEN_CALLS = 12
-MAX_RETRIES = 4
-BASE_BACKOFF_SECONDS = 30
+# MIN_SECONDS_BETWEEN_CALLS = 12
+# MAX_RETRIES = 4
+# BASE_BACKOFF_SECONDS = 30
+
+MIN_SECONDS_BETWEEN_CALLS = 3
+MAX_RETRIES = 5
+BASE_BACKOFF_SECONDS = 10
 
 
 def _call_with_retry(llm: ChatGoogleGenerativeAI, messages: list[BaseMessage]) -> str:
