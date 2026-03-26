@@ -31,7 +31,7 @@ class TranslationResult(BaseModel):
     document_type: DocumentType
     document_type_confidence: float
     extracted_text: str
-    technical_terms: list[dict]
+    # technical_terms: list[dict]
     summary: str
     translated_text: str
     agent_results: list[AgentResult]

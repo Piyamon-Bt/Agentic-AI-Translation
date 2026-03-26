@@ -64,38 +64,38 @@ async def translate_document(file: UploadFile = File(...)) -> TranslationResult:
         _cleanup_file(file_path)
 
 
-@router.get("/knowledge-base/status")
-def knowledge_base_status() -> dict:
-    """
-    Return the number of documents currently stored in the ChromaDB collection.
-    """
-    try:
-        collection = _get_chroma_collection()
-        total = collection.count()
+# @router.get("/knowledge-base/status")
+# def knowledge_base_status() -> dict:
+#     """
+#     Return the number of documents currently stored in the ChromaDB collection.
+#     """
+#     try:
+#         collection = _get_chroma_collection()
+#         total = collection.count()
 
-        glossary_result = collection.get(where={"type": "glossary"})
-        glossary_count = len(glossary_result.get("ids") or [])
+#         glossary_result = collection.get(where={"type": "glossary"})
+#         glossary_count = len(glossary_result.get("ids") or [])
 
-        reference_result = collection.get(where={"type": "reference"})
-        reference_count = len(reference_result.get("ids") or [])
+#         reference_result = collection.get(where={"type": "reference"})
+#         reference_count = len(reference_result.get("ids") or [])
 
-        return {
-            "total_documents": total,
-            "glossary_terms": glossary_count,
-            "reference_chunks": reference_count,
-        }
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+#         return {
+#             "total_documents": total,
+#             "glossary_terms": glossary_count,
+#             "reference_chunks": reference_count,
+#         }
+#     except Exception as exc:
+#         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/knowledge-base/reset")
-def knowledge_base_reset() -> dict:
-    """
-    Delete and recreate the ChromaDB collection.
-    Call this after adding or updating files in knowledge_base/.
-    """
-    try:
-        reset_vector_store()
-        return {"message": "Vector store reset. It will reseed on the next translation request."}
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+# @router.post("/knowledge-base/reset")
+# def knowledge_base_reset() -> dict:
+#     """
+#     Delete and recreate the ChromaDB collection.
+#     Call this after adding or updating files in knowledge_base/.
+#     """
+#     try:
+#         reset_vector_store()
+#         return {"message": "Vector store reset. It will reseed on the next translation request."}
+#     except Exception as exc:
+#         raise HTTPException(status_code=500, detail=str(exc))

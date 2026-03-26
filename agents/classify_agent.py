@@ -3,7 +3,6 @@ from langchain.schema import HumanMessage, SystemMessage
 from core.gemini_client import get_llm, _call_with_retry
 from models.schemas import AgentResult, AgentStatus, DocumentType
 
-
 CLASSIFICATION_SYSTEM_PROMPT = """You are a document classification expert specializing in Chinese documents.
 Given the extracted text from a Chinese document, classify it into one of these categories:
 - contract: Legal agreements, service contracts, employment contracts
@@ -19,23 +18,20 @@ Respond ONLY with a valid JSON object in this exact format (no markdown, no expl
 {"document_type": "<category>", "confidence": <0.0-1.0>, "reasoning": "<brief reason in English>"}"""
 
 
-def run_classify_agent(extracted_text: str, technical_terms: list[dict]) -> AgentResult:
+def run_classify_agent(extracted_text: str) -> AgentResult:
     """
-    Classifies the document type using Gemini LLM.
-    Uses extracted text and detected technical terms as context.
+    Classifies the document type using Gemini LLM based only on extracted text.
+    Removed technical_terms parameter to match the updated pipeline.
     """
     try:
+        # Use low temperature for deterministic classification results
         llm = get_llm(temperature=0.1)
 
-        term_context = ""
-        if technical_terms:
-            terms_str = ", ".join([t["chinese"] for t in technical_terms[:10]])
-            term_context = f"\n\nDetected domain terms: {terms_str}"
-
+        # Use first 1500 characters which usually contain the most relevant classification context
         sample_text = extracted_text[:1500]
-        user_message = f"Classify the following Chinese document:\n\n{sample_text}{term_context}"
+        user_message = f"Classify the following Chinese document:\n\n{sample_text}"
 
-        raw_text = _call_with_retry(
+        raw_response = _call_with_retry(
             llm,
             [
                 SystemMessage(content=CLASSIFICATION_SYSTEM_PROMPT),
@@ -43,9 +39,14 @@ def run_classify_agent(extracted_text: str, technical_terms: list[dict]) -> Agen
             ],
         )
 
-        parsed = json.loads(raw_text)
+        # Parse JSON response from LLM
+        # Ensure raw_response is stripped of any potential markdown backticks
+        json_str = raw_response.strip().replace("```json", "").replace("```", "")
+        parsed = json.loads(json_str)
 
         doc_type_str = parsed.get("document_type", "unknown")
+        
+        # Validate and map to DocumentType enum
         try:
             document_type = DocumentType(doc_type_str)
         except ValueError:

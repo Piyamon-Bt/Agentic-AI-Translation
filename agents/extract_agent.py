@@ -65,7 +65,7 @@ def _extract_text_with_pymupdf(file_path: str) -> str:
             text_parts.append(page_text)
 
     doc.close()
-    return "\n".join(text_parts)
+    return " ".join(text_parts)
 
 
 def _extract_text_from_pdf_with_ocr(file_path: str) -> str:
@@ -91,7 +91,7 @@ def _extract_text_from_pdf_with_ocr(file_path: str) -> str:
             ocr_results.append(ocr_text)
 
     doc.close()
-    return "\n".join(ocr_results)
+    return " ".join(ocr_results)
 
 
 def _is_image_file(file_path: str) -> bool:
