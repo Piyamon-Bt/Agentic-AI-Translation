@@ -1,7 +1,7 @@
 from langchain.schema import HumanMessage, SystemMessage
 from core.gemini_client import get_llm, _call_with_retry
 from models.schemas import AgentResult, AgentStatus, DocumentType
-
+from utils.text_processor import clean_continuous_text
 
 def _build_translation_prompt(document_type: str) -> str:
     """Build a context-aware Chinese-to-Thai translation system prompt."""
@@ -27,25 +27,17 @@ Instructions:
 Output only the translated Thai text, nothing else."""
 
 
-def run_translate_agent(
-    extracted_text: str,
-    document_type: str,
-) -> AgentResult:
-    """
-    Translates Chinese document text to Thai using Gemini and cleans up newline characters.
-    """
+def run_translate_agent(extracted_text: str, document_type: str) -> AgentResult:
     try:
         llm = get_llm(temperature=0.2)
-
         system_prompt = _build_translation_prompt(document_type)
 
-        # 1. Clean extracted_text before processing to remove redundant newlines
-        clean_input_text = " ".join(extracted_text.split())
+        # 1. Clean input ก่อนส่งเข้า LLM
+        clean_input = clean_continuous_text(extracted_text) #
 
-        chunk_size = 3000
         text_chunks = [
-            clean_input_text[i: i + chunk_size]
-            for i in range(0, len(clean_input_text), chunk_size)
+            clean_input[i: i + 3000]
+            for i in range(0, len(clean_input), 3000)
         ]
 
         translated_parts = []
@@ -59,22 +51,16 @@ def run_translate_agent(
             )
             translated_parts.append(translated_chunk)
 
-        # 2. Join translated parts and perform final cleanup of any remaining newlines
-        combined_translation = " ".join(translated_parts)
-        final_translation = " ".join(combined_translation.split())
+        # 2. Final Clean เพื่อกำจัด \n ที่ LLM อาจจะเผลอใส่มา
+        full_translation = " ".join(translated_parts)
+        final_translation = clean_continuous_text(full_translation) #
 
         return AgentResult(
             agent_name="translate_agent",
             status=AgentStatus.DONE,
-            output={
-                "translated_text": final_translation,
-                "chunk_count": len(text_chunks),
-            },
+            output={"translated_text": final_translation},
         )
-
     except Exception as exc:
-        return AgentResult(
-            agent_name="translate_agent",
-            status=AgentStatus.ERROR,
-            output={"error": str(exc)},
-        )
+        return AgentResult(agent_name="translate_agent", 
+                           status=AgentStatus.ERROR, 
+                           output={"error": str(exc)})

@@ -1,6 +1,7 @@
 from langchain.schema import HumanMessage, SystemMessage
 from core.gemini_client import get_llm, _call_with_retry
 from models.schemas import AgentResult, AgentStatus
+from utils.text_processor import clean_continuous_text
 
 
 SUMMARY_SYSTEM_PROMPT = """You are a professional document analyst specializing in Thai summaries.
@@ -22,18 +23,13 @@ Instructions:
 
 
 def run_summarize_agent(translated_text: str, document_type: str) -> AgentResult:
-    """
-    Generates a concise Thai summary of the translated document as continuous text.
-    """
     try:
-        # Use temperature 0.3 for factual and focused summaries
         llm = get_llm(temperature=0.3)
-
-        # Pre-clean translated_text to remove redundant newlines for better context analysis
-        clean_context = " ".join(translated_text.split())
-
-        # Use first 4000 characters of translation for summarization
+        
+        # Pre-clean input for better analysis
+        clean_context = clean_continuous_text(translated_text)
         sample_text = clean_context[:4000]
+        
         user_message = (
             f"Document type: {document_type}\n\n"
             f"Translated content:\n{sample_text}\n\n"
@@ -48,15 +44,14 @@ def run_summarize_agent(translated_text: str, document_type: str) -> AgentResult
             ],
         )
 
-        # Final cleanup: Ensure no newline characters or extra spaces in the output
-        final_summary = " ".join(raw_summary.split())
+        # Use regex-based cleaning for 100% newline removal
+        final_summary = clean_continuous_text(raw_summary)
 
         return AgentResult(
             agent_name="summarize_agent",
             status=AgentStatus.DONE,
             output={"summary": final_summary},
         )
-
     except Exception as exc:
         return AgentResult(
             agent_name="summarize_agent",

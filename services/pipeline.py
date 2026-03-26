@@ -1,4 +1,5 @@
 from typing import TypedDict, Union
+from utils.text_processor import clean_continuous_text
 from langgraph.graph import StateGraph, END
 from agents.file_type_agent import run_file_type_agent
 from agents.extract_agent import run_extract_agent
@@ -36,7 +37,9 @@ def node_extract_text(state: PipelineState) -> PipelineState:
     if result.status == AgentStatus.ERROR:
         state["error"] = result.output.get("error")
     else:
-        state["extracted_text"] = result.output["extracted_text"]
+        # Clean extracted text immediately at the source
+        raw_text = result.output.get("extracted_text", "")
+        state["extracted_text"] = clean_continuous_text(raw_text) #
     return state
 
 
