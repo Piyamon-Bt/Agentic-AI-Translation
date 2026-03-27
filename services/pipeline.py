@@ -1,5 +1,6 @@
 from typing import TypedDict, Union
 from utils.text_processor import clean_continuous_text
+from utils.pinyin_converter import convert_pinyin_both
 from langgraph.graph import StateGraph, END
 from agents.file_type_agent import run_file_type_agent
 from agents.extract_agent import run_extract_agent
@@ -14,6 +15,7 @@ class PipelineState(TypedDict):
     file_name: str
     agent_results: list[AgentResult]
     extracted_text: str
+    pinyin: str
     document_type: str
     document_type_confidence: float
     translated_text: str
@@ -30,16 +32,29 @@ def node_file_type_check(state: PipelineState) -> PipelineState:
 
 
 def node_extract_text(state: PipelineState) -> PipelineState:
+    """
+    Node สำหรับดึงข้อความจากไฟล์ ทำความสะอาด Newline และแปลงเป็น Pinyin
+    """
     if state.get("error"):
         return state
+        
     result = run_extract_agent(state["file_path"])
     state["agent_results"].append(result)
+    
     if result.status == AgentStatus.ERROR:
         state["error"] = result.output.get("error")
     else:
-        # Clean extracted text immediately at the source
+        # 1. ดึงข้อความดิบออกมา
         raw_text = result.output.get("extracted_text", "")
-        state["extracted_text"] = clean_continuous_text(raw_text) #
+        
+        # 2. ทำความสะอาด Newline ทันทีด้วย Regex จาก text_processor
+        clean_text = clean_continuous_text(raw_text)
+        state["extracted_text"] = clean_text
+        
+        # 3. แปลงภาษาจีนที่ทำความสะอาดแล้วเป็น Pinyin
+        pinyin_res = convert_pinyin_both(clean_text)
+        state["pinyin"] = pinyin_res["pinyin_marks"]
+        
     return state
 
 
@@ -131,6 +146,7 @@ def run_translation_pipeline(file_path: str, file_name: str) -> TranslationResul
         "file_name": file_name,
         "agent_results": [],
         "extracted_text": "",
+        "pinyin": "",
         "document_type": DocumentType.UNKNOWN.value,
         "document_type_confidence": 0.0,
         "translated_text": "",
@@ -150,6 +166,7 @@ def run_translation_pipeline(file_path: str, file_name: str) -> TranslationResul
         document_type=DocumentType(final_state["document_type"]),
         document_type_confidence=final_state["document_type_confidence"],
         extracted_text=final_state["extracted_text"],
+        pinyin=final_state["pinyin"],
         summary=final_state["summary"],
         translated_text=final_state["translated_text"],
         agent_results=final_state["agent_results"],

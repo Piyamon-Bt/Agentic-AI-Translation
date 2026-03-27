@@ -32,3 +32,6 @@ pydantic==2.9.2
 pydantic-settings==2.6.1
 python-magic==0.4.27
 python-docx==1.1.2
+g2pM==0.1.2.5
+jieba==0.42.1
+OpenCC==1.1.9
